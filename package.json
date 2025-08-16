@@ -10,5 +10,16 @@
   },
   "devDependencies": {
     "k6-html-reporter": "^1.0.5"
-  }
+  },
+  "main": "custom-tags.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/longchhun09/k6-automate.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/longchhun09/k6-automate/issues"
+  },
+  "homepage": "https://github.com/longchhun09/k6-automate#readme"
 }
