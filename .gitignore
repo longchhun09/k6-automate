@@ -1,0 +1,7 @@
+/node_modules
+
+
+/k6-*.html
+result.html
+/k6-*.html/*
+k6-*.json
