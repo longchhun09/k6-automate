@@ -1,0 +1,121 @@
+name: K6 Automate Tests
+
+on:
+  # Allow this workflow to be manually triggered from the GitHub UI
+  workflow_dispatch:
+    inputs:
+      job_to_run:
+        description: 'Select the job to run'
+        required: true
+        default: 'stress'
+        type: choice
+        options:
+          - stress
+          - heavyLoad
+      feature:
+        description: 'Feature to run test against'
+        required: true
+        default: 'user'
+        type: choice
+        options:
+          - auth
+          - user
+
+      env:
+        description: 'Environment to run tests against'
+        required: false
+        default: 'envUAT'
+        type: choice
+        options:
+          - envUAT
+          - envPrd
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+jobs:
+  k6_test:
+    name: k6 UAT test run
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v1
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Set environment variables
+        run: |
+          echo "🔧 Setting up K6 Environment Variables..."
+
+          # Set base URL based on environment
+          if [ "${{ github.event.inputs.env }}" = "envPrd" ]; then
+            echo "🌍 Production Environment Selected"
+            echo "📍 Base URL: ${{ secrets.K6_PRD_BASE_URL || 'Production URL not set' }}"
+            echo "K6_BASE_URL=${{ secrets.K6_PRD_BASE_URL }}" >> $GITHUB_ENV
+          else
+            echo "🧪 UAT Environment Selected"
+            echo "📍 Base URL: ${{ secrets.K6_UAT_BASE_URL }}"
+            echo "K6_BASE_URL=${{ secrets.K6_UAT_BASE_URL }}" >> $GITHUB_ENV
+          fi
+
+          echo "📚 Course ID: ${{ secrets.K6_COURSE_ID || '1' }}"
+          echo "🔑 API Token: ${{ secrets.K6_API_TOKEN && 'Set' || 'Not Set' }}"
+          echo "====================================="
+
+      - name: Set test file based on job and feature
+        id: set-test-file
+        run: |
+          if [ "${{ github.event.inputs.job_to_run }}" = "stress" ] && [ "${{ github.event.inputs.feature }}" = "user" ]; then
+            echo "filename=feature/user-stress-test.js" >> $GITHUB_OUTPUT
+          else
+            echo "filename=feature/auth-stress-test.js" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Run UAT k6 test
+        uses: grafana/k6-action@v0.2.0
+        with:
+          filename: ${{ steps.set-test-file.outputs.filename }}
+          flags: --out json=${{ steps.set-test-file.outputs.output-file }}
+        env:
+          K6_API_TOKEN: ${{ secrets.K6_API_TOKEN }}
+          K6_BASE_URL: ${{ env.K6_BASE_URL }}
+        continue-on-error: true
+
+      - name: Stage reports for publishing
+        run: |
+          # Create a 'public' directory. This will become the root of your GitHub Pages site.
+          mkdir -p public
+
+          # Create a versioned directory for the current report based on the workflow run number.
+          mkdir -p public/reports/${{ github.run_number }}
+
+          # Copy the generated report to the versioned directory. It will be named 'index.html' for a clean URL.
+          cp result.html public/reports/${{ github.run_number }}/index.html
+
+          # Also copy the report to the root of the site to serve as the "latest" report.
+          cp result.html public/index.html
+
+      - name: Deploy report to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./public
+          publish_branch: report
+          keep_files: true
+          commit_message: 'docs: Deploy k6 report for run ${{ github.run_number }}'
+
+      - name: Output GitHub Pages URL
+        run: |
+          # Construct and print the URLs for easy access.
+          echo "✅ Report deployment complete!"
+          echo "📄 Latest Report URL: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/"
+          echo "📜 This Run's Report URL: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/reports/${{ github.run_number }}/"
