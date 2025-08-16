@@ -6,7 +6,11 @@
     "test": "k6 run scenarios.js",
     "test:custom": "k6 run custom-tags.js",
     "test:load": "k6 run static-test-files/load-test-scenario.js",
-    "test:html": "k6 run --out json=results.json scenarios.js && k6-html-reporter results.json"
+    "test:html": "k6 run --out json=results.json scenarios.js && k6-html-reporter results.json",
+    "install:k6": "npm install -g k6",
+    "install:k6-html-reporter": "npm install k6-html-reporter --save-dev",
+    "check:k6": "k6 version",
+    "check:k6-html-reporter": "npx k6-html-reporter --version"
   },
   "devDependencies": {
     "k6-html-reporter": "^1.0.5"
