@@ -1,0 +1,58 @@
+{
+  "users": [
+    {
+      "id": 1,
+      "name": "John Doe",
+      "email": "john.doe@example.com",
+      "role": "user"
+    },
+    {
+      "id": 2,
+      "name": "Jane Smith",
+      "email": "jane.smith@example.com",
+      "role": "admin"
+    },
+    {
+      "id": 3,
+      "name": "Bob Johnson",
+      "email": "bob.johnson@example.com",
+      "role": "user"
+    }
+  ],
+  "products": [
+    {
+      "id": 1,
+      "name": "Laptop",
+      "price": 999.99,
+      "category": "electronics"
+    },
+    {
+      "id": 2,
+      "name": "Mouse",
+      "price": 29.99,
+      "category": "electronics"
+    },
+    {
+      "id": 3,
+      "name": "Keyboard",
+      "price": 89.99,
+      "category": "electronics"
+    }
+  ],
+  "orders": [
+    {
+      "id": 1,
+      "userId": 1,
+      "products": [1, 2],
+      "total": 1029.98,
+      "status": "pending"
+    },
+    {
+      "id": 2,
+      "userId": 2,
+      "products": [3],
+      "total": 89.99,
+      "status": "completed"
+    }
+  ]
+}
