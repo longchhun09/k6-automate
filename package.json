@@ -1,0 +1,11 @@
+{
+  "name": "k6-tool",
+  "version": "1.0.0",
+  "description": "k6 performance testing project",
+  "scripts": {
+    "test": "k6 run scenarios.js"
+  },
+  "devDependencies": {
+    "k6-html-reporter": "^1.0.5"
+  }
+}
